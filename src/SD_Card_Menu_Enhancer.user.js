@@ -964,21 +964,6 @@ function downloadAll() {
 			case 'changeFolder': delay = parseInt(changeFolderDelayInput.value) / 100 * 200000; break;
 		}
 
-		/*
-		if (p_fileType === 'video') {
-
-			delay = parseInt(videoDelayInput.value) / 100 * 200000;
-
-		} else if (p_fileType === 'image') {
-
-			delay = parseInt(imageDelayInput.value) / 100 * 200000;
-
-		} else if (p_fileType === 'changeFolder') {
-
-			delay = parseInt(changeFolderDelayInput.value) / 100 * 200000;
-
-		}
-*/
 		delay = (delay > 1000)? delay: 1000; // Make sure it's atleast 1000ms.
 
 		return delay;
