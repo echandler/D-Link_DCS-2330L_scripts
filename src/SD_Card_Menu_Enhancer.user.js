@@ -912,7 +912,6 @@ function downloadAll() {
 
                     if (xmlhttp.status == 200) {
                         // Make a "HEAD" request just to see if the file exists.
-                        // Then click the anchor and download the file if a 200 status is returned.
 
                         fileAnchor.style.color = 'green';
 
