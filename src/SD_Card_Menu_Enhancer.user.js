@@ -571,7 +571,6 @@ function main() {
                         if (xmlhttp.readyState == 4 ) {
                             if (xmlhttp.status == 200) {
                                 // Make a "HEAD" request just to see if the file exists.
-                                // Then click the anchor and download the file if a 200 status is returned.
 
                                 // Creating a iframe seems to be more reliable than creating an anchor and using anchor.click();
                                 var iframe = document.createElement('iframe');
