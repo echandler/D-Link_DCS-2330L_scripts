@@ -87,7 +87,7 @@ function main() {
     /*
     This is basically the main function that initiates the script.
 
-    It get's added to a script tag and loaded on the page so the code has
+    It gets added to a script tag and loaded on the page so the code has
     access to the "native" camera functions like the "changeFolder" function
     and global variables (designated as -> g_*).
     */
