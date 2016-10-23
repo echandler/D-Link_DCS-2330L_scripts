@@ -94,7 +94,7 @@ function main() {
 
     // ~~~~ Add a notification to the corner so everyone knows the script is running. ~~~~
     var div = document.createElement('div');
-    div.innerHTML = 'DCS-2330l SD Card Menu Enhancer v 5.0'; // Change this version when updateing script also!
+    div.innerHTML = 'DCS-2330l SD Card Menu Enhancer v6'; // Change this version when updateing script also!
     div.id = 'DCS-2330l_SD_Card_Menu_Enhancer_notification';
 
     document.body.appendChild(div);
