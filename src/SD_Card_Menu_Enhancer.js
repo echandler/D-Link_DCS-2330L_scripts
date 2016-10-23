@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DCS-2330l SD Card Menu Enhancer
 // @author       echandler
-// @version      5
+// @version      6
 // @match        http*://*/setup.htm
 // ==/UserScript==
 /* jshint -W097 */
@@ -119,7 +119,7 @@ function main() {
             + "#maincontent table table tbody tr:first-child { background-color: rgb(255, 111, 0); border-top: 2px solid rgb(255, 111, 0); border-bottom: 2px solid rgb(255, 111, 0); }\n "
             + "#maincontent table table tbody tr:first-child td { line-height: 15px !important;}\n "
             + "#maincontent table table tbody tr:first-child td:not(:first-child) { border-left: 1px solid rgb(0,0,0); }\n "
-            + "#maincontent table table td { border-top: 1px solid rgb(202, 202, 202); padding: 5px 0px 4px 10px; line-height: 20px; }\n "
+            + "#maincontent table table td { border-top: 1px solid rgb(220, 220, 220); padding: 5px 0px 4px 10px; line-height: 20px; }\n "
             + "#maincontent table table input[type='checkbox'] { margin: 3px 3px 2px 4px; }\n "
             + "#sd_table_container { margin: 10px 0px; border: 1px solid rgb(255, 111, 0); }\n "
             + "#sd_table_container * { font-size: 13px; }\n "
@@ -132,9 +132,9 @@ function main() {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Watch for changes to g_lockLink.
-    watchVar.watch(window, 'g_lockLink', function(p_lockLinkValue) {
-
-        if (p_lockLinkValue || !isOnSDCardMenu() || g_thispath.toLowerCase().indexOf('picture') >= 0) {
+    watchVar.watch(window, 'g_lockLink', function test(p_lockLinkValue) {
+        
+        if (!isOnSDCardMenu() || g_thispath.toLowerCase().indexOf('picture') >= 0) {
 
             document.querySelector('#maincontent_container').style.visibility = 'visible';
 
@@ -145,10 +145,33 @@ function main() {
 
         updateTable();
 
-        document.getElementById('okBtn').value = 'OK/Delete';
+        updateOkBtn();
 
         document.querySelector('#maincontent_container').style.visibility = 'visible';
     });
+
+    function updateOkBtn(){
+        var button = document.getElementById('okBtn');
+        var oldOnclick = button.onclick;
+        
+        
+        if (!g_filelistStr){
+            // If it is not on the video download page then don't go any further.
+            return;
+        }
+        
+        button.value = 'OK/Delete';
+        
+        button.onclick = null;
+        
+        button.addEventListener('click', function(e){
+
+            if (confirm('\nThis action could erase files!\n\nDo you want to proceed??\n')){
+
+                oldOnclick(e);
+            }
+        });
+    }
 
     // Update the sd card menu table element to a fancier version.
     function updateTable() {
@@ -279,7 +302,8 @@ function main() {
                         h = +h;
                         var parsedHour = parseHour(h);
 
-                        return ((h > 12 || !h) ? '<span style="color: rgb(120, 120, 120);">'+ h +'</span> ' : '')+ parsedHour.hour +' '+ parsedHour.amPM;
+                        //return ((h > 12 || !h) ? '<span style="color: rgb(120, 120, 120);">'+ h +'</span> ' : '')+ parsedHour.hour +' '+ parsedHour.amPM;
+                          return (parsedHour.hour +' '+ parsedHour.amPM) + '<span style="display:inline-block; color: rgb(120, 120, 120);margin-left: 5px;">'+ h +'</span> '
                     });
 
                 } else if (g_thispath == "/video") {
@@ -1204,6 +1228,12 @@ function downloadAll() {
             return document.getElementById(this.id);
         },
         createBtn: function() {
+            
+            if (!document.getElementById('okBtn')) {
+            
+                return;
+            }
+            
             var downloadFoldersButton = document.getElementById('okBtn').cloneNode(true);
 
             downloadFoldersButton.value = 'Download Folders';
