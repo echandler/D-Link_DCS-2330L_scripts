@@ -191,7 +191,7 @@ function main() {
         var strongs = document.querySelectorAll('#maincontent strong');
 
         // Change the 'Delete' column header text to 'Select',and add label.
-        document.getElementById('delall').parentElement.innerHTML = document.getElementById('delall').parentElement.innerHTML.replace(/Delete/, '<label id"delall_label" for="delall">Select</label>');
+        document.getElementById('delall').parentElement.innerHTML = document.getElementById('delall').parentElement.innerHTML.replace(/Delete/, '<label id"delall_label" style="cursor: pointer;" for="delall">Select</label>');
         document.getElementById('delall').style.display = 'none'; // <- Remove the annoying checkbox.
 
         if (g_folderslistStr) {
