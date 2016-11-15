@@ -851,10 +851,10 @@ function main() {
     }
 
     function parseHour(hour) {
-        hour = +hour;
-
+        hour = parseInt(hour);
+        
         return {
-            hour: (hour % 12) ? (hour % 12) : 12,
+            hour: (hour % 12) ? (hour % 12) : 12, // If hour = 0 (12 AM), then return 12 instead of 0.
             amPM: (hour < 12) ? 'AM' : 'PM'
         };
     }
