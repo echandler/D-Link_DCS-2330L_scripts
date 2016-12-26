@@ -756,26 +756,6 @@ function main() {
         p_elem.scrollIntoView();
     }
 
-    // WARNING: THIS WILL BE DIFFERENT FOR EVERYBODY!
-    // Mine is currently set at 20mb videos, should autodetect that somehow.
-    function isCorruptVideo(p_fileAnchor) {
-        var fileName = p_fileAnchor.href.match(/.*\/(.*)$/) && p_fileAnchor.href.match(/.*\/(.*)$/)[1];
-
-        if (fileName) {
-            var regEx = new RegExp(fileName +';.*?;.*?;(.*?);');
-            var sizeInBytes = g_filelistStr.match(regEx) && g_filelistStr.match(regEx)[1];
-        }
-
-        if (sizeInBytes) {
-
-            return sizeInBytes < 20480; // 2048KB === 20MB
-
-        } else {
-
-            return true;
-        }
-    }
-
     // This function updates the current working path of the sd card. It shows where in the sd card file system you are.
     function updateSDCardPath() {
         var mainContentTDs = document.getElementById('maincontent').querySelectorAll('td');
