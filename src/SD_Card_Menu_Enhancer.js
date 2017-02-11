@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DCS-2330l SD Card Menu Enhancer
 // @author       echandler
-// @version      6
+// @version      6.1
 // @match        http*://*/setup.htm
 // ==/UserScript==
 /* jshint -W097 */
@@ -850,6 +850,7 @@ function downloadAll() {
         2: { regEx: /\/\d{8}&/ },
         3: { regEx: /\/\d\d&/ },
         4: { regEx: /(mp4|avi|jpg)$/ },//regEx: /[mp4|avi]$/,
+        //4: { regEx: /jpg$/ },//regEx: /[mp4|avi]$/,
     };
 
     function parseLinksFromFolder(p_array, p_dontChangePage, p_callBack) {
@@ -1077,7 +1078,7 @@ function downloadAll() {
         return selected;
     }
 
-    function downloadFolderBtnHandler() {
+    function downloadBtnHandler() {
         var selectedFolders = getSelectedFolders();
 
         // Reset the broken links array.
@@ -1107,53 +1108,54 @@ function downloadAll() {
     }
 
     function createModalAndDownloadControls() {
-        modal.create(null );
+            modal.create(null );
 
-        // Max download time is 200 seconds.
-        var fileDownloadControlsForm = document.createElement('form');
-        fileDownloadControlsForm.innerHTML =
-            '<h1>SD Card Download Settings</h1>'
-            + '<table>'
-            +   '<tbody>'
-            +     '<tr>'
-            +       '<td style="text-align: right;">Folder change delay:</td>'
-            +       '<td> <input style="width: 200px; vertical-align: middle;" oninput="update_delay_vars()" type="range" id="change_folder_delay" value="'+ 2 +'"></td>'
-            +       '<td id="change_folder_delay_info" style="width: 2.19em;">'+ 4 +'s</td>'
-            +     '</tr>'
-            +     '<tr>'
-            +       '<td style="text-align: right;">Video download delay:</td>'
-            +       '<td> <input style="width: 200px; vertical-align: middle;" oninput="update_delay_vars()" type="range" id="video_download_delay" value="'+ 15 +'"></td>'
-            +       '<td id="video_download_delay_info" style="width: 2.19em;">'+ 30 +'s</td>'
-            +     '</tr>'
-            +     '<tr>'
-            +       '<td style="text-align: right;">Image download delay:</td>'
-            +       '<td> <input style="width: 200px; vertical-align: middle;" oninput="update_delay_vars()" type="range" id="image_download_delay" value="'+ 0 +'"></td>'
-            +       '<td id="image_download_delay_info" style="width: 2.19em;">'+ 1 +'s</td>'
-            +     '</tr>'
-            +   '</tbody>'
-            + '</table>'
-            + '<input style="display: block; margin: 0px auto;" type="button" value="Quit" id="quit_downloads">';
+            // Max download time is 200 seconds.
+            var fileDownloadControlsForm = document.createElement('form');
+            fileDownloadControlsForm.innerHTML =
+                '<h1>SD Card Download Settings</h1>'
+                + '<table>'
+                +   '<tbody>'
+                +     '<tr>'
+                +       '<td style="text-align: right;">Folder change delay:</td>'
+                +       '<td> <input style="width: 200px; vertical-align: middle;" oninput="update_delay_vars()" type="range" id="change_folder_delay" value="'+ 2 +'"></td>'
+                +       '<td id="change_folder_delay_info" style="width: 2.19em;">'+ 4 +'s</td>'
+                +     '</tr>'
+                +     '<tr>'
+                +       '<td style="text-align: right;">Video download delay:</td>'
+                +       '<td> <input style="width: 200px; vertical-align: middle;" oninput="update_delay_vars()" type="range" id="video_download_delay" value="'+ 15 +'"></td>'
+                +       '<td id="video_download_delay_info" style="width: 2.19em;">'+ 30 +'s</td>'
+                +     '</tr>'
+                +     '<tr>'
+                +       '<td style="text-align: right;">Image download delay:</td>'
+                +       '<td> <input style="width: 200px; vertical-align: middle;" oninput="update_delay_vars()" type="range" id="image_download_delay" value="'+ 0 +'"></td>'
+                +       '<td id="image_download_delay_info" style="width: 2.19em;">'+ 1 +'s</td>'
+                +     '</tr>'
+                +   '</tbody>'
+                + '</table>'
+                + '<input style="display: block; margin: 0px auto;" type="button" value="Quit" id="quit_downloads">';
 
-        fileDownloadControlsForm.style.cssText = 'position: fixed; top: 10px; left: 10px; background: white; padding: 10px; border: 1px solid rgb(255, 111, 0);';
+            fileDownloadControlsForm.style.cssText = 'position: fixed; top: 10px; left: 10px; background: white; padding: 10px; border: 1px solid rgb(255, 111, 0);';
 
-        modal.modalElement.appendChild(fileDownloadControlsForm);
+            modal.modalElement.appendChild(fileDownloadControlsForm);
 
-        document.getElementById('quit_downloads').addEventListener('click',  downloadsFinished);
+            document.getElementById('quit_downloads').addEventListener('click',  downloadsFinished);
 
-        window.update_delay_vars = function () {
-            var changeFolderDelayInput = document.getElementById('change_folder_delay');
-            var videoDelayInput = document.getElementById('video_download_delay');
-            var imageDelayInput = document.getElementById('image_download_delay');
+            window.update_delay_vars = function () {
+                var changeFolderDelayInput = document.getElementById('change_folder_delay');
+                var videoDelayInput = document.getElementById('video_download_delay');
+                var imageDelayInput = document.getElementById('image_download_delay');
 
-            var folderChangeDelay  = Math.round((parseInt(changeFolderDelayInput.value) / 100 * 200000 / 1000)) || 1;
-            var videoDownloadDelay = Math.round((parseInt(videoDelayInput.value)        / 100 * 200000 / 1000)) || 1;
-            var imageDownloadDelay = Math.round((parseInt(imageDelayInput.value)        / 100 * 200000 / 1000)) || 1;
+                var folderChangeDelay  = Math.round((parseInt(changeFolderDelayInput.value) / 100 * 200000 / 1000)) || 1;
+                var videoDownloadDelay = Math.round((parseInt(videoDelayInput.value)        / 100 * 200000 / 1000)) || 1;
+                var imageDownloadDelay = Math.round((parseInt(imageDelayInput.value)        / 100 * 200000 / 1000)) || 1;
 
-            document.getElementById('change_folder_delay_info').innerText  = folderChangeDelay  +'s';
-            document.getElementById('video_download_delay_info').innerText = videoDownloadDelay +'s';
-            document.getElementById('image_download_delay_info').innerText = imageDownloadDelay +'s';
-        };
-    }
+                document.getElementById('change_folder_delay_info').innerText  = folderChangeDelay  +'s';
+                document.getElementById('video_download_delay_info').innerText = videoDownloadDelay +'s';
+                document.getElementById('image_download_delay_info').innerText = imageDownloadDelay +'s';
+            };
+        }
+    
 
     function downloadsFinished() {
         var date = new Date();
@@ -1220,17 +1222,17 @@ function downloadAll() {
             return document.getElementById(this.id);
         },
         createBtn: function() {
-            
+
             if (!document.getElementById('okBtn')) {
-            
+
                 return;
             }
-            
+
             var downloadFoldersButton = document.getElementById('okBtn').cloneNode(true);
 
             downloadFoldersButton.value = 'Download Folders';
             downloadFoldersButton.id = this.id;
-            downloadFoldersButton.onclick = downloadFolderBtnHandler();
+            downloadFoldersButton.onclick = downloadBtnHandler;
             downloadFoldersButton.style.marginLeft = '10px';
 
             document.getElementById('okBtn').parentElement.appendChild(downloadFoldersButton);
