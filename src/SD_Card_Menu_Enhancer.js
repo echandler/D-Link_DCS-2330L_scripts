@@ -1,14 +1,28 @@
 // ==UserScript==
 // @name         DCS-2330l SD Card Menu Enhancer
 // @author       echandler
-// @version      6.1
+// @version      7
 // @match        http*://*/setup.htm
 // ==/UserScript==
 /* jshint -W097 */
 'use strict';
 
+// Hack to get around browser timeout throttling feature.
+// Play a silent noise in the background, the throttling feature is "disabled"
+// because they don't want to disrupt the audio the person is listening to.
+// http://noisehack.com/custom-audio-effects-javascript-web-audio-api/
+    var audioContext = new AudioContext()
+    var whiteNoise = audioContext.createScriptProcessor(4096, 1, 1);
+    whiteNoise.onaudioprocess = function(e) {
+		var output = e.outputBuffer.getChannelData(0);
+		output[0] = 0.011; // I can't hear 0.005 on these speakers.
+    }
+
+	whiteNoise.connect(audioContext.destination);
+// end timer hack
+
 function varWatcher() {
-    var objs_to_listen; // Rename 'objs_to_listen' to something else.
+   var objs_to_listen; // Rename 'objs_to_listen' to something else.
 
     window.watchVar = {};
 
@@ -92,20 +106,27 @@ function main() {
     and global variables (designated as -> g_*).
     */
 
+    // Video file icon. Artist website: http://www.aha-soft.com/.
+    var fileBackgroundImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAEbklEQVRIS42VbUxbZRiG7/NJQYQJGYxhjeAYn9lAWqYgiiAq67ohwwWZGdHIfjCdcTOTRM00LkZdlpiY7McyNlzUzE2WMSkwHIwORmWUZUO+KS1QmHy4DdloS3t6XnOOStKU0L5/zsnJ85zr3Pd9nvel8N/af+DQSZtt8VVCSDQPN+bU5XjIh4Ei4v8lK14JRSPYeRcxfWfhECkA1H1FoOLA0a++qJYapCfy2qp9bUJ36YJSuu/vuY0jRicSNiVAFFcH0DSNod5hlIRZod1eKL/rzbJ37v94pirMA1BUXEK+P30SDocDvbe6cXw0GHGpyRDd7lUV0AwD0+1+FAaa8IpGA47lUPH+B/ihukr++GUFEiAjIwMulwAFTWAIeQ6xKQkgPgAUw8DcN4jMhXbYRQqsBBwdRdWJ454A7Y6dRKVSw+VyIpCh8Pua56GMT/BLgXVoEJkP2rHoEsEyLMbGLKg+dcITkJtfQJqb6mU7jAYDPrm2iKj4RBBxdYsomsHsyCBKI6awu2yP3F+8azdqzv/kDag5fxZLSw4YOw349g8ejz2V5Bdg3jKAohATil4vAcdxKN9bsTJAnSFZ5IKCITAEZYNXxgE+FIBm4LSOIMveDrsAMAyDUZPZG5D9Qg5RpUshOxHEUjA8+iJc62JA+fhNCU2Dm7Ygy6bH4pIIhmVgsYyh9uIvnhalq58lxhsdsocd+qt4r34O9sgNoH0MmkjReGTOjHLlNPZWvCv35+UXoOVKozeg6XID7HY7OttacbiLYHJNrF+AJxbGsSfcjNKyt8FzHHaVlK4MUKlUEAQBCgbQB2RinFnrF+BJ9xxynAbYBCJnYDKZvAGpT6tJWlqaHHIgS6E37CVExif5NWgzwwPYNN8Mm1OUAWMWC1qvXvG0aGN8Ehka7JM9bGlswOHWebz8RiEEp2vVrYLlOTSf+xXaEDMOflQp12ZsyULXjQ5vwPXr1+QM9L814XhfAHKKt0NwOn0AeLRdqEMe34vyin3geR4azY6VAVIGkkUBNIEpehsytxVAcPlQwHHoqGtE3J86OASAZaUMRr0BMbEblzNQsBQsSi3UBRoILh8KOB5dDTpsmNJh0ekGy7KYmBhHt7HT06LHlTHEOmGW7Wioq8WhSzNI02jg9qGA4Tj0NDZgZ6QVn372udyfnLIZ/X093oCb3Z2w2+xoqq/DMSOQmL8Vog8AzXEYbrmMgqAB7D/4oZxBbl7+yoDU1M3Le9FghBbK7DyIwuoZ0CwHa1szEv/Swe4iskUWi8UbELU+mqSkSIB/96KBdVqEP5MH4gNAsRzudrYgZVaHB0tSBgyskxMYGuj3tEgC3JmalD2srTmH8p8nELwlF/ABAMvBbtTjLeUkvvzmmNyfkJTsDYiIjCIz03fkgrqLNSg9YwJJzwVEYdU5AM2CvaXHvtgZHPn6qFwbHh5hv3dvLsjjTF4bub7y4cJCpZuIoQpaBJX7Mf7mI/w6D0KXZhF68zssOgkoinKEhIRWmM0jpyXAP0hjBjep1rt1AAAAAElFTkSuQmCC";
+    // Preview file icon. Artist website: http://www.aha-soft.com/.
+    var previewBackgroundImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADK0lEQVQ4T3WSC2yTVRTHf/ejD9e127eu68rajtGHdWxhw4AuBEFGRAIu6HxEERgBgwZJplGWGKNxmgVdJIpoNBoXMVMMC4/YLJoQHeqUCCRidRljjLD5YhS3ajtm+7W95iurL+LJTe495/zOyT83f8H/xNqDP278fDSxF/E3ICV6umTy0eu+zFfF0vfOr45E/+gVklz3nzHRGrpqvf3lIfrv915f4yz8Rm+Kkl0Dsus2D/XOa66Cq1TTv2rTWgb3K0M0OOWB5zfUtNQJMSWKXzgle9cF/gJzInQ1+UsvzOT555oPzqIrfmRxxRZR1HFS7m6am4OuAAKhd/Xzn2EdyP2DgP7T4+wfnkLYnvlqZn9exJW03lNMvb+c4gITBkXkRBiQFClpEkktx+w8cg5hffKoTPw2xZxrvVTZLVQ5rNS6bBQaBSHVwLxSI2YDJNMQiaYY+FUjoyVJpTR29g4iLDs+lpcvp6kMevCoFm7y2QmVWVhYbiJoE+zrH+Hk0AUWhlzct8TPcFxyfDzF+MTvdBz+FlHQ+qGcTit4gx4CDiv31rsI2U1UqwrrX/uMI6d+wu5QmbgU45Y6N93blzEYyzIymWT7W30I87YemRQFVPjdLPPZWb+gnGCJmcMnztG29zjNTTfi95Yx8kOUg+Gv6Wy5gaZFPs5MJLmnM4wwPtAtNbOKy+emqdrBxgXllFoMdPYO8M6xUZY3VJOVEiEER48NsmnxHHasqeXilMbKp3sQhpYumbY6me13syJQSmvDbKQQhCO/8NyhCLYylVlGIxlNIx6N8dQd81lbV4GWybC0rRsxa90bMlPiwRtw43NY6VhRSaFJYTSeYfenw/R9fwGEAjLLzbUuWhuDzC0yEE2kWPXEuwjl7j26N/IuYkPzcnbdWcPZyTTDMY0TYzEuxZM4bGYWVaoEVSN+u4GH90U4EP4CIZpfkrLAiamijGxWks5C+6oAjzX6uDidZSyRJa5JbEZBpU3BaVFoP/QdL77/Cc+2rGwXm8NjD3W9vf/1vN9n/MzWuxp/fnz1POFVzWZ9saIIxmLJ1J6PBjKv9vS5O7fd/mDbrYE3/wRDdSqSyaklCwAAAABJRU5ErkJggg==";
+    
+    
     // ~~~~ Add a notification to the corner so everyone knows the script is running. ~~~~
     var div = document.createElement('div');
-    div.innerHTML = 'DCS-2330l SD Card Menu Enhancer v6'; // Change this version when updateing script also!
+    div.innerHTML = 'DCS-2330l SD Card Menu Enhancer v7'; // Change this version when updateing script also!
     div.id = 'DCS-2330l_SD_Card_Menu_Enhancer_notification';
 
     document.body.appendChild(div);
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // See if they are searching for a video, run this only once at first page load.
+    
     setTimeout(function () {
-
+		
+        // See if they are searching for a video, run this only once at first page load.
         findVideoOnCamera.init(location.hash);
 
-    }, 1500);
+    }, 1);
 
     // ~~~~ Add some custom css to the page once. ~~~~
     if (!document.getElementById('DCS-2330l SD Card Menu Enhancer styles')) {
@@ -133,11 +154,15 @@ function main() {
 
     // Watch for changes to g_lockLink.
     watchVar.watch(window, 'g_lockLink', function test(p_lockLinkValue) {
-        
+
+		if (p_lockLinkValue === true) { return; };
+		
         if (!isOnSDCardMenu() || g_thispath.toLowerCase().indexOf('picture') >= 0) {
 
-            document.querySelector('#maincontent_container').style.visibility = 'visible';
-
+			if (document.querySelector('#maincontent_container')){
+				
+				document.querySelector('#maincontent_container').style.visibility = 'visible';
+			}
             return;
         }
 
@@ -179,13 +204,14 @@ function main() {
         var previewAnchor = undefined;
         var dateAnchorsArray = [];
         var downloadFilesButton = undefined;
+        var containerId = 'sd_table_container';
 
         table.border = 0;
         table.style.backgroundColor = 'rgb(241, 241, 241)';
 
         // Wrap the table in a div, another idea from github. Fixes the css border issue with tables.
-        table.parentElement.innerHTML = "<div id='sd_table_container'>"+ table.outerHTML +"</div>";
-
+        table.parentElement.innerHTML = "<div id='"+ containerId +"'>"+ table.outerHTML +"</div>";
+        
         // Check for anchors and strongs after the table has been over written.
         var anchors = document.querySelectorAll('#maincontent table table a');
         var strongs = document.querySelectorAll('#maincontent strong');
@@ -210,6 +236,8 @@ function main() {
             downloadFilesButton.style.marginLeft = '10px';
 
             document.getElementById('okBtn').parentElement.appendChild(downloadFilesButton);
+
+            appendLoadMoreVideosBtn(document.getElementById(containerId).parentElement);
         }
 
         // Used for remembering the last thing they clicked on in that particular path. Got the idea from github.
@@ -237,9 +265,9 @@ function main() {
                 p_this.style.color = 'purple';
             }.toString() +")(this)");
 
-            // Is it on the page where the image and video files are located?
             if (g_filelistStr) {
-
+				// Is it on the page where the image and video files are located?
+                
                 // Remove the original preview image links.
                 if (/\.jpg/.test(anchors[n].innerHTML)) {
 
@@ -247,9 +275,8 @@ function main() {
 
                     continue;
                 }
-
-                // Video file icon. Artist website: http://www.aha-soft.com/.
-                anchors[n].style.backgroundImage = 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAEbklEQVRIS42VbUxbZRiG7/NJQYQJGYxhjeAYn9lAWqYgiiAq67ohwwWZGdHIfjCdcTOTRM00LkZdlpiY7McyNlzUzE2WMSkwHIwORmWUZUO+KS1QmHy4DdloS3t6XnOOStKU0L5/zsnJ85zr3Pd9nvel8N/af+DQSZtt8VVCSDQPN+bU5XjIh4Ei4v8lK14JRSPYeRcxfWfhECkA1H1FoOLA0a++qJYapCfy2qp9bUJ36YJSuu/vuY0jRicSNiVAFFcH0DSNod5hlIRZod1eKL/rzbJ37v94pirMA1BUXEK+P30SDocDvbe6cXw0GHGpyRDd7lUV0AwD0+1+FAaa8IpGA47lUPH+B/ihukr++GUFEiAjIwMulwAFTWAIeQ6xKQkgPgAUw8DcN4jMhXbYRQqsBBwdRdWJ454A7Y6dRKVSw+VyIpCh8Pua56GMT/BLgXVoEJkP2rHoEsEyLMbGLKg+dcITkJtfQJqb6mU7jAYDPrm2iKj4RBBxdYsomsHsyCBKI6awu2yP3F+8azdqzv/kDag5fxZLSw4YOw349g8ejz2V5Bdg3jKAohATil4vAcdxKN9bsTJAnSFZ5IKCITAEZYNXxgE+FIBm4LSOIMveDrsAMAyDUZPZG5D9Qg5RpUshOxHEUjA8+iJc62JA+fhNCU2Dm7Ygy6bH4pIIhmVgsYyh9uIvnhalq58lxhsdsocd+qt4r34O9sgNoH0MmkjReGTOjHLlNPZWvCv35+UXoOVKozeg6XID7HY7OttacbiLYHJNrF+AJxbGsSfcjNKyt8FzHHaVlK4MUKlUEAQBCgbQB2RinFnrF+BJ9xxynAbYBCJnYDKZvAGpT6tJWlqaHHIgS6E37CVExif5NWgzwwPYNN8Mm1OUAWMWC1qvXvG0aGN8Ehka7JM9bGlswOHWebz8RiEEp2vVrYLlOTSf+xXaEDMOflQp12ZsyULXjQ5vwPXr1+QM9L814XhfAHKKt0NwOn0AeLRdqEMe34vyin3geR4azY6VAVIGkkUBNIEpehsytxVAcPlQwHHoqGtE3J86OASAZaUMRr0BMbEblzNQsBQsSi3UBRoILh8KOB5dDTpsmNJh0ekGy7KYmBhHt7HT06LHlTHEOmGW7Wioq8WhSzNI02jg9qGA4Tj0NDZgZ6QVn372udyfnLIZ/X093oCb3Z2w2+xoqq/DMSOQmL8Vog8AzXEYbrmMgqAB7D/4oZxBbl7+yoDU1M3Le9FghBbK7DyIwuoZ0CwHa1szEv/Swe4iskUWi8UbELU+mqSkSIB/96KBdVqEP5MH4gNAsRzudrYgZVaHB0tSBgyskxMYGuj3tEgC3JmalD2srTmH8p8nELwlF/ABAMvBbtTjLeUkvvzmmNyfkJTsDYiIjCIz03fkgrqLNSg9YwJJzwVEYdU5AM2CvaXHvtgZHPn6qFwbHh5hv3dvLsjjTF4bub7y4cJCpZuIoQpaBJX7Mf7mI/w6D0KXZhF68zssOgkoinKEhIRWmM0jpyXAP0hjBjep1rt1AAAAAElFTkSuQmCC")';
+                
+                anchors[n].style.backgroundImage = 'url('+ fileBackgroundImage +')';
 
                 // Don't forget to remove this before uploading to the web.
                 //if (isCorruptVideo(anchors[n])) {
@@ -260,29 +287,11 @@ function main() {
                     //anchors[n].style.backgroundImage = 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAEKUlEQVRIS7WVW2wUVRjHf2dmu23pdlm20AvQ5aJoEBIDCRIQURFKIuwSIYKJUhFfSDS+GMOTUi8xRl+MiUFNDC/eHrhICypEIgaFJkBSxIZbt7Vrt9vupfdt2Z2Zc8xMsbJsW+oDk8xMzvm+7/875/+dzAju8SXusT7/C3B10zN7paD6oWNHXp3qwqYMuLYhpEqXLkAJjeSfYR4+WT+l2ikl3agJqcrgo7j1LCqZIJMVhM9HWH7iyF3r75rQHtq+T/OV1pWvXojR0gJCx+XWibT0k05n65YdO/z2ZHbdFRB+crOauydE5teTiLIqQKHiXbi8fi7/EWflie8n1Zg0GNm0LV6yYvGsIq2Hgse3ULC2xlls9vRJzEMH6EkXEOse6n7khyOVE+1icsDGrapy13oyp3/C89nRHI2B2iCFFbO5fC3FioZDE+pMGIjWbFHe0Bpc6RhmWxue/YdzATufxlURYKA/TVt0kNU/Hh1Xa9zJWGj7O1pZ6Zv+p5aQDbchYx35gF0hXOXVuFE0t/UynDXfXV1/8K07rRofsG6z8r6wAWKtzqmRsU48n3ybU9v3xFK02fPRDAPLNY0LSYP1Px/P08ubiAefrS94YG6weFkA1RHFSiUxL55j+qmrOYDUgmno1feDYeG2FE1/JekaVg3b0snQ7Yn5gG21yvfcKkZOHEX29qDpbmRrC77zsVzAIu8YQJjgloKG5g52pFM5mjmDrrUbOwsXVVS59W7M4QzYnyqpkOHr+BqjEwKUoXBZ8HdqiKZEf+T5oZ55/yaPAboqAkFrxKz3f1iL8XsjyuVytu8A2lrxnW3PBSz2o1fNd3JsgDAkpULn4PUoAhHaMZhssAvGALGimcpb9xJWuAkMhbKj5i1AXy8F6zZT8vp7DmTog71kvjuA7q8Gw3QAGBJdCkbSWY53xHl5pM/Rdh6J8sA+ysvqpr24CuvKdUBDSTkKsCRkDYyWK8iuXgcgvCUI73R0b2UOQJmKUiU41ZkkOXLz853D/XscQJfmU94v38A88wvoLkd0DGBbFI/h+fgbXEuWOwDz0gUGdm9Fmz5zzCJ7B5gKzZDYTf8qEuWVzKAQiRlzGt3Bx1ZqARcqngKl8gHhG/gaO3J78KAPfc7CPIANKrSguW+QpsGBhEgUzVKe/a+RPXsGobvBMvMB7a34fruzyTPRqwLjAmxIsRJ83dmJSMyarzwf7SJ77hwC255R32+3iHQavH5K3v8UraySgdpNmK3X0H2zx3qgblnkWGVI/Lj4IhpBJHxz2ouCawLiPg0GR/4DmBbCvi2JUIqbl5rByNq/A0RxMeg6hb4KyIweUy072gNb3G3CxVSfbdHoKeqeMbddKQKUe5CWQkqJJQSWVFhKYaGcsbTboyznbSiFtCTmrbhpydF8JImbWSwlI7uH++f9A1ILSN66QmVDAAAAAElFTkSuQmCC")';
                 //}
 
-                anchors[n].innerHTML = anchors[n].innerHTML.replace(/.*(\d\d)(\d\d)(\d\d)\.mp4/, function (x, hour, minutes, seconds) {
-                    var parsedHour = parseHour(hour);
-
-                    return parsedHour.hour + ':' + minutes + ':' + seconds + " " + parsedHour.amPM;
-                });
+                anchors[n].innerHTML = parseTime(anchors[n].innerHTML);
 
                 // Create an anchor to show a preview image of the associated video.
                 // The original preview image link will be removed later.
-                previewAnchor = document.createElement('a');
-                previewAnchor.style.cssText = 'background-position: center left; background-repeat: no-repeat; padding-left: 13px; background-size: 11px 11px;';
-                previewAnchor.style.marginLeft = '25px';
-
-                // Preview image icon. Artist website: http://www.aha-soft.com/.
-                previewAnchor.style.backgroundImage = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADK0lEQVQ4T3WSC2yTVRTHf/ejD9e127eu68rajtGHdWxhw4AuBEFGRAIu6HxEERgBgwZJplGWGKNxmgVdJIpoNBoXMVMMC4/YLJoQHeqUCCRidRljjLD5YhS3ajtm+7W95iurL+LJTe495/zOyT83f8H/xNqDP278fDSxF/E3ICV6umTy0eu+zFfF0vfOr45E/+gVklz3nzHRGrpqvf3lIfrv915f4yz8Rm+Kkl0Dsus2D/XOa66Cq1TTv2rTWgb3K0M0OOWB5zfUtNQJMSWKXzgle9cF/gJzInQ1+UsvzOT555oPzqIrfmRxxRZR1HFS7m6am4OuAAKhd/Xzn2EdyP2DgP7T4+wfnkLYnvlqZn9exJW03lNMvb+c4gITBkXkRBiQFClpEkktx+w8cg5hffKoTPw2xZxrvVTZLVQ5rNS6bBQaBSHVwLxSI2YDJNMQiaYY+FUjoyVJpTR29g4iLDs+lpcvp6kMevCoFm7y2QmVWVhYbiJoE+zrH+Hk0AUWhlzct8TPcFxyfDzF+MTvdBz+FlHQ+qGcTit4gx4CDiv31rsI2U1UqwrrX/uMI6d+wu5QmbgU45Y6N93blzEYyzIymWT7W30I87YemRQFVPjdLPPZWb+gnGCJmcMnztG29zjNTTfi95Yx8kOUg+Gv6Wy5gaZFPs5MJLmnM4wwPtAtNbOKy+emqdrBxgXllFoMdPYO8M6xUZY3VJOVEiEER48NsmnxHHasqeXilMbKp3sQhpYumbY6me13syJQSmvDbKQQhCO/8NyhCLYylVlGIxlNIx6N8dQd81lbV4GWybC0rRsxa90bMlPiwRtw43NY6VhRSaFJYTSeYfenw/R9fwGEAjLLzbUuWhuDzC0yEE2kWPXEuwjl7j26N/IuYkPzcnbdWcPZyTTDMY0TYzEuxZM4bGYWVaoEVSN+u4GH90U4EP4CIZpfkrLAiamijGxWks5C+6oAjzX6uDidZSyRJa5JbEZBpU3BaVFoP/QdL77/Cc+2rGwXm8NjD3W9vf/1vN9n/MzWuxp/fnz1POFVzWZ9saIIxmLJ1J6PBjKv9vS5O7fd/mDbrYE3/wRDdSqSyaklCwAAAABJRU5ErkJggg==)';
-
-                previewAnchor.href = anchors[n].href.replace(/(mp4|avi)/i, 'jpg');
-
-                previewAnchor.previewData = {};
-
-                previewAnchor.addEventListener = previewAnchor.addEventListener || function (e, f) { previewAnchor.attachEvent('on' + e, f); };
-
-                previewAnchor.onmouseover = previewAnchorMouseOver; //<= This needs to stay as onmouseover attribute, that way it can be called by other code.
-                previewAnchor.addEventListener('mouseout', previewAnchorMouseOut);
+                previewAnchor = createPreviewAnchor(anchors[n].href.replace(/(mp4|avi)/i, 'jpg'));
 
                 anchors[n].parentElement.appendChild(previewAnchor);
 
@@ -335,6 +344,26 @@ function main() {
                 return new Date(b +'/'+ c +'/'+ d).toDateString() + '<'; // <- Format the date so it looks normal.
             });
         });
+    }
+    
+    function createPreviewAnchor(p_href){
+        var previewAnchor = document.createElement('a');
+        previewAnchor.style.cssText = 'background-position: center left; background-repeat: no-repeat; margin-left: 25px; padding-left: 13px; background-size: 11px 11px;';
+        previewAnchor.style.backgroundImage = 'url('+ previewBackgroundImage +')';
+        previewAnchor.href = p_href;
+        previewAnchor.previewData = {};
+        previewAnchor.addEventListener = previewAnchor.addEventListener || function (e, f) { previewAnchor.attachEvent('on' + e, f); };
+        previewAnchor.onmouseover = previewAnchorMouseOver; //<= This needs to stay as onmouseover attribute, that way it can be called by other code.
+        previewAnchor.addEventListener('mouseout', previewAnchorMouseOut);
+
+        return previewAnchor;
+    }
+
+    function appendLoadMoreVideosBtn(p_elem){
+        var anchorBtn = document.createElement('button');
+        anchorBtn.onclick = clickHandlerThing;
+        anchorBtn.innerHTML = 'Next page'
+        p_elem.appendChild(anchorBtn);
     }
 
     function previewAnchorMouseOver(arg_e) {
@@ -663,10 +692,12 @@ function main() {
 
     findVideoOnCamera.goToFolder = function () {
         var that = this;
+		var changeContentWatcher = undefined;
+		var findVideo = false;
 
         var watcher = watchVar.watch(window, 'g_lockLink', function (state) {
-
-            if (!state) {
+           
+            if (!state && window.g_thispage && findVideo) {
 
                 watchVar.unWatch(window, 'g_lockLink', watcher);
 
@@ -674,10 +705,37 @@ function main() {
             }
         });
 
-        ChangeContent('cgi-bin/sdlist.cgi?path=/video/'+ this.day + '/'+ this.hour + "&page="+ this.pageNumber);
-    }
+		if (g_lockLink === false){
+			
+			ChangeContent('cgi-bin/sdlist.cgi?path=/video/'+ this.day + '/'+ this.hour + "&page="+ this.pageNumber);
+		
+		} else {
+			
+			changeContentWatcher = watchVar.watch(window, 'g_lockLink', function (state) {
 
-    findVideoOnCamera.findVideoAnchor = function () {
+				if (!state) {
+
+					watchVar.unWatch(window, 'g_lockLink', changeContentWatcher);
+                    
+					ChangeContent('cgi-bin/sdlist.cgi?path=/video/'+ this.day + '/'+ this.hour + "&page="+ this.pageNumber);
+
+                    findVideo = true;
+				}
+			}.bind(this));
+		}
+    }
+	
+	findVideoOnCamera.goToNextPage = function(){
+
+		// Didn't find it on that page so go to the next page.
+		// Maybe this should be a callback instead of hard coded.
+		//this.pageNumber = this.pageNumber + 1;
+		clickHandlerThing(this.findVideoAnchor.bind(this, true), this.findVideoAnchor.bind(this));
+		//this.goToFolder();
+        
+	}
+
+    findVideoOnCamera.findVideoAnchor = function (p_isLastPage) {
         var videosArray = (Array.prototype.slice.call(document.querySelectorAll('a'))).filter(function (elem) { return /mp4|avi/.test(elem); });
         var elem = undefined;
         var n = -1;
@@ -724,21 +782,16 @@ function main() {
                 return;
             }
         }
-
-        if (this.pageNumber === g_totalpage) {
+        
+		if (p_isLastPage || this.pageNumber === g_totalpage) {
 
             this.doTheHighlight(videosArray[n-1]); // Must be the last video.
 
         } else {
-
-            // Didn't find it on that page so go to the next page.
-            // Maybe this should be a callback instead of hard coded.
-            this.pageNumber = this.pageNumber + 1;
-
-            this.goToFolder();
-        }
-    }
-
+			
+			this.goToNextPage();
+		}
+	}
     findVideoOnCamera.doTheHighlight = function (p_elem) {
 
         location.hash = '';
@@ -829,14 +882,119 @@ function main() {
 
         return g_backList[g_backList.length - 1] === "setup_sdlist.htm";
     }
+    
+	function parseTime(str){
+        return str.replace(/.*(\d\d)(\d\d)(\d\d)\.mp4/, function (x, hour, minutes, seconds) {
+                    var parsedHour = parseHour(hour);
 
+                    return parsedHour.hour + ':' + minutes + ':' + seconds + " " + parsedHour.amPM;
+                });
+	}
+	
     function parseHour(hour) {
         hour = parseInt(hour);
-        
+
         return {
             hour: (hour % 12) ? (hour % 12) : 12, // If hour = 0 (12 AM), then return 12 instead of 0.
             amPM: (hour < 12) ? 'AM' : 'PM'
         };
+    }
+	
+    function getNextPage(p_url, p_callback){
+        var xhttp = new XMLHttpRequest();
+        //'cgi-bin/sdlist.cgi?path='+g_thispath+'&page='+pageselect.GV()
+        xhttp.onreadystatechange = function(){
+            if (xhttp.readyState == 4 && xhttp.status == 200){
+                if (xhttp.response.indexOf('var g_filelistStr') === -1){
+
+                    setTimeout(function(){ getNextPage('setup_sdlist.htm', p_callback) }, 300);
+
+                    return;
+
+                } else {
+
+                    parseVideoInfo(xhttp.response.replace(/[\s\S]*GV\("(.*)",[\s\S]*/, '$1'), p_callback);
+                }
+            }
+        }
+
+        xhttp.open("GET", p_url, true);
+        xhttp.setRequestHeader("If-Modified-Since","0");
+
+        xhttp.send(null);
+    }
+
+    function parseVideoInfo(txt, p_callback){
+        var parsed = txt.split(',');
+        var table = document.getElementById('sd_table_container').querySelector('table');
+        var tbody = table.querySelector('tbody');
+        var tr = null;
+        var td1,td2,td3,td4 = null;
+        var videoAnchor, previewAnchor = null;
+        var info = null;
+        var parsedHour = null;
+
+        for (var n = 0; n < parsed.length; n++){
+
+            info = parsed[n].split(';');
+
+            if (info[0] && !/avi|mp4/.test(info[0])) {
+                continue;
+            }
+
+            tr = document.createElement('tr');
+            
+            td1 = document.createElement('td');
+            td1.align = 'center';
+            td1.innerHTML = '<input name="" id="" type="hidden" size="0" maxlength="128" value="'+ (g_thispath +'/'+ info[0]) +'" disabled="">'
+                            + '<input type="checkbox">';
+            
+			// td2 group.
+			td2 = document.createElement('td');
+
+			videoAnchor = document.createElement('a');
+			videoAnchor.href = 'cgi-bin/sddownload.cgi?file='+ (g_thispath +'/'+ info[0]);
+			videoAnchor.innerHTML = parseTime(info[0]);
+			videoAnchor.style.cssText = 'background-position: left center; background-repeat: no-repeat; padding-left: 20px; background-size: 12px 12px;';
+			videoAnchor.style.backgroundImage = 'url('+ fileBackgroundImage +')';
+
+			previewAnchor = createPreviewAnchor(videoAnchor.href.replace(/(mp4|avi)/i, 'jpg'));
+
+			td2.appendChild(videoAnchor);
+			td2.appendChild(previewAnchor);
+            // end of td2 group 
+			
+            td3 = document.createElement('td');
+            td3.innerHTML = info[0].replace(/.*(.{3})$/, '$1');
+            
+            td4 = document.createElement('td');
+            td4.innerHTML = info[3] +' <a href="http://superuser.com/questions/938234/size-of-files-in-windows-os-its-kb-or-kb?answertab=votes#answer-938259">KB</a>';
+            
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            tr.appendChild(td3);
+            tr.appendChild(td4);
+			
+            tbody.appendChild(tr);
+        }
+		
+		if (p_callback){
+        
+			p_callback();
+		}
+    }
+
+    function clickHandlerThing(p_errCallBack, p_callback) {
+        pageselect.elem = pageselect.elem || document.getElementById(pageselect.id);
+        pageselect.maxValue = pageselect.maxValue || +pageselect.elem.options[pageselect.elem.options.length-1].value
+        pageselect.val2 = pageselect.val2? pageselect.val2 + 1: pageselect.value + 1;
+
+        if (pageselect.val2 > pageselect.maxValue) {
+			if (p_errCallBack) p_errCallBack();
+            return;
+        }
+
+        getNextPage('/cgi-bin/sdlist.cgi?path='+g_thispath+'&page='+ pageselect.val2, p_callback);
     }
 }
 
@@ -1262,6 +1420,6 @@ function downloadAll() {
     document.head.appendChild(scriptTag);
 
 })(['('+ varWatcher.toString()          +')()',
-    '('+ downloadAll.toString()         +')()',
+    '('+ downloadAll.toString()         +')();',
     '('+ main.toString() +')()',
    ].join(';\n\n'));
