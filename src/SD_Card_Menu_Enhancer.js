@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DCS-2330l SD Card Menu Enhancer
 // @author       echandler
-// @version      7
+// @version      8
 // @match        http*://*/setup.htm
 // ==/UserScript==
 /* jshint -W097 */
@@ -114,17 +114,38 @@ function main() {
     
     // ~~~~ Add a notification to the corner so everyone knows the script is running. ~~~~
     var div = document.createElement('div');
-    div.innerHTML = 'DCS-2330l SD Card Menu Enhancer v7'; // Change this version when updateing script also!
+    div.innerHTML = 'DCS-2330l SD Card Menu Enhancer v8'; // Change this version when updateing script also!
     div.id = 'DCS-2330l_SD_Card_Menu_Enhancer_notification';
 
     document.body.appendChild(div);
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    document.addEventListener('drop', function(e){    
+		// Creat a file drop listener that will call the findVideoOnCamera function
+		// passing the name of the dopped video file so that it can find it on the
+		// camera's SD card.
+		e.preventDefault();
+		e.stopPropagation();
+		findVideoOnCamera.init(e.dataTransfer.files[0].name);
+	}, false);
+	document.addEventListener("dragover", function(e) {	
+		// Stop the browser from playing the video in a video player.
+		e.preventDefault();	    
+	}, false);
     
-    setTimeout(function () {
+	setTimeout(function () {
 		
-        // See if they are searching for a video, run this only once at first page load.
-        findVideoOnCamera.init(location.hash);
+		function _findVideo(){
+			if (!window.g_lockLink){
+				setTimeout(_findVideo, 50);
+				return;
+			}
+			
+			// See if they are searching for a video, run this only once at first page load.
+			findVideoOnCamera.init(location.hash);
+		}
+		
+		_findVideo();
 
     }, 1);
 
@@ -686,14 +707,25 @@ function main() {
         this.pageNumber = 1;
 
         this.wasOnPreviousPage = false;
-
-        this.goToFolder();
+         
+	if (window.g_thispath
+	   && p_videoNameString.indexOf(window.g_thispath.substring(7,15)) !== -1 // Video name has same year/month/day as g_thispath
+	   && p_videoNameString.indexOf(window.g_thispath.substring(16, 18)) !== -1 // Video name has same hour as g_thispath
+	   ) { 
+		
+	    // VideoName is on this page somewhere.
+	    this.findVideoAnchor();
+	
+	} else {
+		
+	    this.goToFolder();
+	}
     }
 
     findVideoOnCamera.goToFolder = function () {
         var that = this;
-		var changeContentWatcher = undefined;
-		var findVideo = false;
+	var changeContentWatcher = undefined;
+	var findVideo = false;
 
         var watcher = watchVar.watch(window, 'g_lockLink', function (state) {
            
@@ -705,27 +737,28 @@ function main() {
             }
         });
 
-		if (g_lockLink === false){
+	if (g_lockLink === false){
 			
-			ChangeContent('cgi-bin/sdlist.cgi?path=/video/'+ this.day + '/'+ this.hour + "&page="+ this.pageNumber);
-		
-		} else {
+	    ChangeContent('cgi-bin/sdlist.cgi?path=/video/'+ this.day + '/'+ this.hour + "&page="+ this.pageNumber);
+            findVideo = true;
 			
-			changeContentWatcher = watchVar.watch(window, 'g_lockLink', function (state) {
+	} else {
+			
+	    changeContentWatcher = watchVar.watch(window, 'g_lockLink', function (state) {
 
-				if (!state) {
+	        if (!state) {
 
-					watchVar.unWatch(window, 'g_lockLink', changeContentWatcher);
+	            watchVar.unWatch(window, 'g_lockLink', changeContentWatcher);
                     
-					ChangeContent('cgi-bin/sdlist.cgi?path=/video/'+ this.day + '/'+ this.hour + "&page="+ this.pageNumber);
+		    ChangeContent('cgi-bin/sdlist.cgi?path=/video/'+ this.day + '/'+ this.hour + "&page="+ this.pageNumber);
 
                     findVideo = true;
-				}
-			}.bind(this));
-		}
+	        }
+	    }.bind(this));
+	}
     }
 	
-	findVideoOnCamera.goToNextPage = function(){
+    findVideoOnCamera.goToNextPage = function(){
 
 		// Didn't find it on that page so go to the next page.
 		// Maybe this should be a callback instead of hard coded.
@@ -733,7 +766,7 @@ function main() {
 		clickHandlerThing(this.findVideoAnchor.bind(this, true), this.findVideoAnchor.bind(this));
 		//this.goToFolder();
         
-	}
+    }
 
     findVideoOnCamera.findVideoAnchor = function (p_isLastPage) {
         var videosArray = (Array.prototype.slice.call(document.querySelectorAll('a'))).filter(function (elem) { return /mp4|avi/.test(elem); });
