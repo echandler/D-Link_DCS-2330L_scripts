@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DCS-2330l SD Card Menu Enhancer
 // @author       echandler
-// @version      8
+// @version      8.0.1
 // @match        http*://*/setup.htm
 // ==/UserScript==
 /* jshint -W097 */
@@ -14,12 +14,12 @@
     var audioContext = new AudioContext()
     var whiteNoise = audioContext.createScriptProcessor(4096, 1, 1);
     whiteNoise.onaudioprocess = function(e) {
-		var output = e.outputBuffer.getChannelData(0);
-		output[0] = 0.011; // I can't hear 0.005 on these speakers.
+        var output = e.outputBuffer.getChannelData(0);
+        output[0] = 0.011; // I can't hear 0.005 on these speakers.
     }
 
-	whiteNoise.connect(audioContext.destination);
-// end timer hack
+    whiteNoise.connect(audioContext.destination);
+// End of timer hack.
 
 function varWatcher() {
    var objs_to_listen; // Rename 'objs_to_listen' to something else.
@@ -114,39 +114,38 @@ function main() {
     
     // ~~~~ Add a notification to the corner so everyone knows the script is running. ~~~~
     var div = document.createElement('div');
-    div.innerHTML = 'DCS-2330l SD Card Menu Enhancer v8'; // Change this version when updateing script also!
+    div.innerHTML = 'DCS-2330l SD Card Menu Enhancer v8.0.1'; // Change this version when updateing script also!
     div.id = 'DCS-2330l_SD_Card_Menu_Enhancer_notification';
 
     document.body.appendChild(div);
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     document.addEventListener('drop', function(e){    
-		// Creat a file drop listener that will call the findVideoOnCamera function
-		// passing the name of the dopped video file so that it can find it on the
-		// camera's SD card.
-		e.preventDefault();
-		e.stopPropagation();
-		findVideoOnCamera.init(e.dataTransfer.files[0].name);
-	}, false);
-	document.addEventListener("dragover", function(e) {	
-		// Stop the browser from playing the video in a video player.
-		e.preventDefault();	    
-	}, false);
+        // Creat a file drop listener that will call the findVideoOnCamera function
+        // passing the name of the dopped video file so that it can find it on the
+        // camera's SD card.
+        e.preventDefault();
+        e.stopPropagation();
+        findVideoOnCamera.init(e.dataTransfer.files[0].name);
+    }, false);
+    document.addEventListener("dragover", function(e) {	
+        // Stop the browser from playing the video in a video player.
+	e.preventDefault();	    
+    }, false);
     
-	setTimeout(function () {
+    setTimeout(function () {
 		
-		function _findVideo(){
-			if (!window.g_lockLink){
-				setTimeout(_findVideo, 50);
-				return;
-			}
+        function _findVideo(){
+	    if (!window.g_lockLink){
+                setTimeout(_findVideo, 50);
+		    return;
+            }
 			
-			// See if they are searching for a video, run this only once at first page load.
-			findVideoOnCamera.init(location.hash);
-		}
+            // See if they are searching for a video, run this only once at first page load.
+            findVideoOnCamera.init(location.hash);
+        }
 		
-		_findVideo();
-
+        _findVideo();
     }, 1);
 
     // ~~~~ Add some custom css to the page once. ~~~~
@@ -176,14 +175,15 @@ function main() {
     // Watch for changes to g_lockLink.
     watchVar.watch(window, 'g_lockLink', function test(p_lockLinkValue) {
 
-		if (p_lockLinkValue === true) { return; };
+        if (p_lockLinkValue === true) { return; };
 		
         if (!isOnSDCardMenu() || g_thispath.toLowerCase().indexOf('picture') >= 0) {
 
-			if (document.querySelector('#maincontent_container')){
+            if (document.querySelector('#maincontent_container')){
 				
-				document.querySelector('#maincontent_container').style.visibility = 'visible';
-			}
+                document.querySelector('#maincontent_container').style.visibility = 'visible';
+	    }
+        
             return;
         }
 
@@ -709,8 +709,8 @@ function main() {
         this.wasOnPreviousPage = false;
          
 	if (window.g_thispath
-	   && p_videoNameString.indexOf(window.g_thispath.substring(7,15)) !== -1 // Video name has same year/month/day as g_thispath
-	   && p_videoNameString.indexOf(window.g_thispath.substring(16, 18)) !== -1 // Video name has same hour as g_thispath
+	   && p_videoNameString.indexOf(window.g_thispath.substring(7,15) +'_') !== -1 // Video name has same year/month/day as g_thispath
+	   && p_videoNameString.indexOf('_'+ window.g_thispath.substring(16, 18)) !== -1 // Video name has same hour as g_thispath
 	   ) { 
 		
 	    // VideoName is on this page somewhere.
@@ -760,11 +760,11 @@ function main() {
 	
     findVideoOnCamera.goToNextPage = function(){
 
-		// Didn't find it on that page so go to the next page.
-		// Maybe this should be a callback instead of hard coded.
-		//this.pageNumber = this.pageNumber + 1;
-		clickHandlerThing(this.findVideoAnchor.bind(this, true), this.findVideoAnchor.bind(this));
-		//this.goToFolder();
+        // Didn't find it on that page so go to the next page.
+        // Maybe this should be a callback instead of hard coded.
+        //this.pageNumber = this.pageNumber + 1;
+        clickHandlerThing(this.findVideoAnchor.bind(this, true), this.findVideoAnchor.bind(this));
+        //this.goToFolder();
         
     }
 
@@ -816,15 +816,16 @@ function main() {
             }
         }
         
-		if (p_isLastPage || this.pageNumber === g_totalpage) {
+        if (p_isLastPage || this.pageNumber === g_totalpage) {
 
             this.doTheHighlight(videosArray[n-1]); // Must be the last video.
 
         } else {
 			
-			this.goToNextPage();
-		}
+            this.goToNextPage();
 	}
+    }
+    
     findVideoOnCamera.doTheHighlight = function (p_elem) {
 
         location.hash = '';
@@ -916,13 +917,13 @@ function main() {
         return g_backList[g_backList.length - 1] === "setup_sdlist.htm";
     }
     
-	function parseTime(str){
+    function parseTime(str){
         return str.replace(/.*(\d\d)(\d\d)(\d\d)\.mp4/, function (x, hour, minutes, seconds) {
-                    var parsedHour = parseHour(hour);
+            var parsedHour = parseHour(hour);
 
-                    return parsedHour.hour + ':' + minutes + ':' + seconds + " " + parsedHour.amPM;
-                });
-	}
+            return parsedHour.hour + ':' + minutes + ':' + seconds + " " + parsedHour.amPM;
+        });
+    }
 	
     function parseHour(hour) {
         hour = parseInt(hour);
@@ -982,19 +983,19 @@ function main() {
             td1.innerHTML = '<input name="" id="" type="hidden" size="0" maxlength="128" value="'+ (g_thispath +'/'+ info[0]) +'" disabled="">'
                             + '<input type="checkbox">';
             
-			// td2 group.
-			td2 = document.createElement('td');
+            // td2 group.
+            td2 = document.createElement('td');
 
-			videoAnchor = document.createElement('a');
-			videoAnchor.href = 'cgi-bin/sddownload.cgi?file='+ (g_thispath +'/'+ info[0]);
-			videoAnchor.innerHTML = parseTime(info[0]);
-			videoAnchor.style.cssText = 'background-position: left center; background-repeat: no-repeat; padding-left: 20px; background-size: 12px 12px;';
-			videoAnchor.style.backgroundImage = 'url('+ fileBackgroundImage +')';
+            videoAnchor = document.createElement('a');
+            videoAnchor.href = 'cgi-bin/sddownload.cgi?file='+ (g_thispath +'/'+ info[0]);
+            videoAnchor.innerHTML = parseTime(info[0]);
+            videoAnchor.style.cssText = 'background-position: left center; background-repeat: no-repeat; padding-left: 20px; background-size: 12px 12px;';
+            videoAnchor.style.backgroundImage = 'url('+ fileBackgroundImage +')';
 
-			previewAnchor = createPreviewAnchor(videoAnchor.href.replace(/(mp4|avi)/i, 'jpg'));
+            previewAnchor = createPreviewAnchor(videoAnchor.href.replace(/(mp4|avi)/i, 'jpg'));
 
-			td2.appendChild(videoAnchor);
-			td2.appendChild(previewAnchor);
+            td2.appendChild(videoAnchor);
+            td2.appendChild(previewAnchor);
             // end of td2 group 
 			
             td3 = document.createElement('td');
