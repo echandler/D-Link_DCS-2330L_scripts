@@ -3,7 +3,7 @@
 - Ablility to download files in mass.
 - Preview videos by hovering mouse over an icon.
 - Preview images are zoomable.
-- "Drag and drop" video's and find them on the SD card automatically.
+- "Drag and drop" videos and find them on the SD card automatically.
 - Warning added when pressing delete button.
 - More improvements under the hood.
 
